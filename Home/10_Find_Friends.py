@@ -3,9 +3,7 @@ from unittest import TestCase
 def check_connection(network, first, second):
     max_depth = len(network)
 
-    if True in map(lambda x: x.startswith(first), network):
-        pass
-    else:
+    if not any(map(lambda x: x.startswith(first), network)):
         for connection in network:
             if first in connection:
                 first = connection[:connection.find("-")]
