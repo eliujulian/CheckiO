@@ -1,57 +1,19 @@
-
+"""
+Not my solution. See here: http://www.checkio.org/mission/golden-pyramid/publications/zero_loss/python-3/first/?ordering=most_voted
+"""
 
 def count_gold(pyramid):
-    """
-    New implementation. Dynamic from top to bottom.
-    """
-    pyramid = [list(level)for level in pyramid]
-    for l in range(len(pyramid) - 1):
-        for c in range(l + 2):
-            if c == 0:
-                pyramid[l + 1][c] += pyramid[l][c]
-            elif c == l + 1:
-                pyramid[l + 1][c] += pyramid[l][c - 1]
-            else:
-                pyramid[l + 1][c] += max(pyramid[l][c], pyramid[l][c - 1])
-    return max(pyramid[len(pyramid) - 1])
+    py = [list(i) for i in pyramid]
+    print(py)
+    for i in reversed(range(len(py)-1)): # pyramid level from bottom
+        for j in range(i+1): #path in level
+            py[i][j] +=(max(py[i+1][j], py[i+1][j+1]))
+            print(py[i][j])
+    return py[0][0]
 
-
-def count_gold_old(pyramid):
-    """
-    Old implementation. Exhaustiv.
-    """
-    possible_path = 2 ** (len(pyramid) - 1)
-
-    result = [[0 for n in range(len(pyramid))]]
-    last = [0 for n in range(len(pyramid))]
-
-    for path in range(possible_path - 1):
-        index_identifier = 0
-
-        for n in range(len(pyramid)):
-            new = last.copy()
-
-            index_identifier += 1
-
-            new[int(len(pyramid)) - index_identifier] += 1
-
-            if index_identifier > 2:
-                for i in range(index_identifier - 2):
-                    i += 1
-                    new[int(len(pyramid)) - index_identifier + i + 1] -= i
-
-            if set([n for n in range(max(set(new)) + 1)]) == set(new):
-                last = new
-                result.append(new)
-                break
-
-    max_gold = [(sum([pyramid[l][p[l]] for l in range(len(pyramid))])) for p in result]
-
-    return max(max_gold)
 
 
 import unittest
-
 
 class TestGold(unittest.TestCase):
     def test_simple(self):
