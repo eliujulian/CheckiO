@@ -1,6 +1,15 @@
 """
-The Doors of Durin were opened by Gandalf and the Fellowship entered in Moria. As they found, this underground kingdom has gates on every passageway. Each gate has a written message which contains the key word. Luckily, Gimli knows how to recognize the key in these messages. It's the most "like" word, which has the greatest average "likeness" coefficient with other words in the message.
-You are given a message. You need to pick out all words (a consecutive sequence of letters or a single letter), calculate the "likeness" coefficients with other words, take an average of them and choose the greatest. Count "likeness" coefficient even for the same words (of course it's 100). If several words have the same resulting value, then choose the word closest to the end of the message. Words in the message can be separated by whitespaces and punctuation. There are no numbers.
+The Doors of Durin were opened by Gandalf and the Fellowship entered in Moria. As they found, this underground kingdom
+has gates on every passageway. Each gate has a written message which contains the key word. Luckily, Gimli knows how to
+recognize the key in these messages. It's the most "like" word, which has the greatest average "likeness" coefficient
+with other words in the message.
+
+You are given a message. You need to pick out all words (a consecutive sequence of letters or a single letter),
+calculate the "likeness" coefficients with other words, take an average of them and choose the greatest. Count
+"likeness" coefficient even for the same words (of course it's 100). If several words have the same resulting value,
+then choose the word closest to the end of the message. Words in the message can be separated by whitespaces and
+punctuation. There are no numbers.
+
 "Likeness" coefficient for two words is measured in percentages using the following rules:
 - Letter case does not matter ("A" == "a");
 - If the first letters of the words are equal, then add 10%;
@@ -8,7 +17,8 @@ You are given a message. You need to pick out all words (a consecutive sequence 
 - Add length comparison as
 (length_of_word1 / length_of_word2) * 30%, if length_of_word1 ≤ length_of_word2;
 , else (length_of_word2 / length_of_word1) * 30%
-- Take all unique letters from the both words in one set and count how many letters appear in the both words. Add to the coefficient (common_letter_number / unique_letters_numbers) * 50;
+- Take all unique letters from the both words in one set and count how many letters appear in the both words.
+Add to the coefficient (common_letter_number / unique_letters_numbers) * 50;
 
 So the maximum coefficient of likeness is 100%. For example: for the words "Bread" and "Beard".
 The result should be given in the lower case.
@@ -33,11 +43,36 @@ all(x in (string.ascii_letters + string.punctuation + " ") for x in message)
 """
 
 from unittest import TestCase
-
+import string
 
 def find_word(message):
-    return "friend"
+    message = ''.join(c for c in message.lower() if c not in set(string.punctuation))
+    words = message.split()[::-1]
 
+    result = [[0 for _ in range(len(words))] for _ in range(len(words))]
+    sums = [0 for _ in words]
+
+    for ind, n in enumerate(words):
+        for ind2, i in enumerate(words):
+            if n[0] == i[0]:
+                result[ind][ind2] += 10
+            if n[-1] == i[-1]:
+                result[ind][ind2] += 10
+            if len(n) <= len(i):
+                result[ind][ind2] += len(n) / len(i) * 30
+            else:
+                result[ind][ind2] += len(i) / len(n) * 30
+
+            result[ind][ind2] += len(set(n) & set(i)) / len(set(n) | set(i)) * 50
+
+            if ind == ind2:
+                result[ind][ind2] = 0
+
+    for ind, row in enumerate(result):
+        for ind2, n in enumerate(row):
+            sums[ind2] += n
+
+    return words[sums.index(max(sums))]
 
 class Tests(TestCase):
     def test_friend(self):
@@ -47,8 +82,7 @@ class Tests(TestCase):
         self.assertEqual("bread", find_word("Beard and Bread"))
 
     def test_durin(self):
-        self.assertEqual("durin", find_word("The Doors of Durin, Lord of Moria. Speak friend and enter. "
-                     "I Narvi made them. Celebrimbor of Hollin drew these signs"))
+        self.assertEqual("durin", find_word("The Doors of Durin, Lord of Moria. Speak friend and enter. I Narvi made them. Celebrimbor of Hollin drew these signs"))
 
     def test_research(self):
         self.assertEqual("according", find_word("Aoccdrnig to a rscheearch at Cmabrigde Uinervtisy."
@@ -56,3 +90,6 @@ class Tests(TestCase):
 
     def test_repeating(self):
         self.assertEqual("three", find_word("One, two, two, three, three, three."))
+
+    def test_fred(self):
+        self.assertEqual("friend", find_word("Speak friend and enter."))
